@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: First Template
+
+Parameters:
+  InstanceName:
+    Type: String
+    Default: gabriel-taveira-ec2
+
+  SecurityGroupName:
+    Type: String
+    Default: gabriel-taveira-security-group
+
+Resources:
+  WebServerInstance:
+    #Type é um campo obrigatório e abriga uma referencia de tipo dos recursos da AWS
+    #https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html
+    Type: AWS::EC2::Instance
+    Properties:
+      #AMI ID, uma propriedade da EC2
+      ImageId: ami-0beaa649c482330f7
+      InstanceType: t2.micro
+      Tags:
+        #os "-" definem elementos de uma lista
+        - 
+          Key: Name
+          Value: !Ref InstanceName
+        -
+          Key: Project
+          Value: CloudFormTest
+
+  WebServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Ref SecurityGroupName
+      SecurityGroupIngress:
+        - 
+          IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      Tags:
+        -
+          Key: Name
+          Value: !Ref SecurityGroupName
