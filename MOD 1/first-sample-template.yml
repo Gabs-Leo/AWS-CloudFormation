@@ -1,0 +1,8 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "Template exemplo!"
+
+Resources:
+  SampleQueue:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: Sample Topic
