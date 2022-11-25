@@ -19,6 +19,10 @@ Resources:
       #AMI ID, uma propriedade da EC2
       ImageId: ami-0beaa649c482330f7
       InstanceType: t2.micro
+      SecurityGroupIds:
+        -
+          #Ref faz referência a algum valor
+          !Ref WebServerSecurityGroup
       Tags:
         #os "-" definem elementos de uma lista
         - 
@@ -42,3 +46,7 @@ Resources:
         -
           Key: Name
           Value: !Ref SecurityGroupName
+
+  SQSQueue:
+    Type: AWS::SQS::Queue
+    DependsOn: WebServerInstance
