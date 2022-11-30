@@ -6,55 +6,72 @@ Resources:
     Type: AWS::EC2::VPC
     Properties:
       CidrBlock: 10.0.0.0/16
-      EnableDnsSupport: true
-      EnableDnsHostnames: true
       Tags:
         - 
-          Key: stack
-          Value: production
-
+          Key: Name
+          Value: gabriel-taveira-vpc
   Subnet:
     Type: AWS::EC2::Subnet
     Properties:
-      VpcId:
-        Ref: VPC
+      VpcId: !Ref VPC
       CidrBlock: 10.0.0.0/24
-      AvailabilityZone: "us-east-2"
-      Tags:
-        - 
-          Key: stack
-          Value: production
+      #precisa ser no 2a, 2b ou 2c
+      AvailabilityZone: "us-east-2a"
+      MapPublicIpOnLaunch: true
 
   RouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
-      VpcId:  
-        Ref: VPC
-      Tags:
-        - 
-          Key: stack
-          Value: production
-  
-  SubnetRouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId:
-        Ref: Subnet
-      RouteTableId:
-        Ref: RouteTable
+      VpcId: !Ref VPC
 
   InternetGateway:
     Type: AWS::EC2::InternetGateway
-    Properties:
-      Tags:
-        - 
-          Key: stack
-          Value: production
 
   AttachGateway:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
-      VpcId:
-        Ref: VPC
-      InternetGatewayId:
-        Ref: InternetGateway
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  Route:
+    Type: AWS::EC2::Route
+    DependsOn: 
+      - AttachGateway
+    Properties:
+       RouteTableId: !Ref RouteTable
+       DestinationCidrBlock: 0.0.0.0/0
+       GatewayId: !Ref InternetGateway
+
+  SubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref Subnet
+      RouteTableId: !Ref RouteTable
+
+  EC2Instance: 
+    Type: AWS::EC2::Instance
+    DependsOn:
+      - Route
+      - SubnetRouteTableAssociation
+    Properties: 
+      ImageId: ami-0beaa649c482330f7
+      InstanceType: t2.micro
+      SubnetId: !Ref Subnet
+      SecurityGroupIds:
+        - !Ref WebServerSecurityGroup
+      Tags:
+        - 
+          Key: Name
+          Value: gabriel-taveira-ec2
+
+  WebServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref VPC
+      GroupDescription: WebServerSecurityGroup
+      SecurityGroupIngress:
+        - 
+          IpProtocol: icmp
+          FromPort: -1
+          ToPort: -1
+          CidrIp: 0.0.0.0/0
